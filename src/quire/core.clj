@@ -26,13 +26,13 @@
   [noteString]
   (let
     [note-info (re-find #"\([ ]*([A-G-a-g][#_]?)[ ]*([ ]+[\d]+)?[ ]*([ ]+[+-]+)?[ ]*\)" noteString)]
+    (println "Note-Info: " (subvec note-info 1))
     (if (= note-info nil) 
       (println "[Parsing Error]: Couldn't find note in program")
       (if (= (note-info 1) nil)
         (println "[Syntax Error]: Note is nil")
-        ; check for empty args -- means pass in default values
         (hash-map 
-          :pitch (note-to-pitch note-info) ; @TODO change args to account for optional LEN
+          :pitch (note-to-pitch (subvec note-info 1))
           :len 
             (if (= (note-info 2) nil) 
               4                           ; default to quarter note
@@ -76,7 +76,7 @@
       octave-up (count (filter (fn [chr] (= \+ chr)) octave))
       octave-down (count (filter (fn [chr] (= \- chr)) octave))
       octave-modifier (* 12 (- octave-up octave-down))]
-    (println note base-pitch octave)
+    (println note base-pitch octave-modifier)
     (+ base-pitch octave-modifier)
   )
   ; TODO implement
