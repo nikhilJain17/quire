@@ -30,8 +30,9 @@
       (println "[Parsing Error]: Couldn't find note in program")
       (if (= (note-info 1) nil)
         (println "[Syntax Error]: Note is nil")
+        ; check for empty args -- means pass in default values
         (hash-map 
-          :pitch (note-to-pitch note-info) 
+          :pitch (note-to-pitch note-info) ; @TODO change args to account for optional LEN
           :len 
             (if (= (note-info 2) nil) 
               4                           ; default to quarter note
@@ -49,9 +50,34 @@
   "Takes a note with optional sharps or flats, along with the octave,
   and returns what pitch (i.e. MIDI number) the note is."
   [note-info]
-  (let [[note sharp-flat octave] note-info]
-    (println note)
-    60
+  ; These are the MIDI pitches as they correspond to middle C and friends.
+  ; The octave arg can send the notes up or down as desired.
+  (def note-pitches {
+    "a"   57
+    "a#"  58
+    "b_"  58
+    "b"   59
+    "c"   60
+    "c#"  61
+    "d_"  61
+    "d"   62
+    "d#"  63
+    "e_"  63
+    "e"   64
+    "f"   65
+    "f#"  66
+    "g_"  66
+    "g"   67
+    "g#"  68
+    "a_"  68
+  })
+  (let [[note _ octave] note-info
+      base-pitch (note-pitches (str/lower-case note))
+      octave-up (count (filter (fn [chr] (= \+ chr)) octave))
+      octave-down (count (filter (fn [chr] (= \- chr)) octave))
+      octave-modifier (* 12 (- octave-up octave-down))]
+    (println note base-pitch octave)
+    (+ base-pitch octave-modifier)
   )
   ; TODO implement
 )
