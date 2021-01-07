@@ -14,22 +14,33 @@
 (defrecord Note [pitch len])
 (defrecord NoteEvent [timing note])
 
+; (G) (F#) (E) (F#) (G) (G) (G) (F#) (F#) (F#) (G) (B) (B) (R) 
+; (G) (F#) (E) (F#) (G) (G) (G) (G) (F#) (F#) (G) (F#) (E 2)
+
 (defn schedule-note-stream [note-stream]
-  "Schedules the noteStream to be played using Overtone."
+  "Schedules the note-stream to be played using Overtone."
   (loop [note-stream note-stream
       curr-time 0]
 
-      (if (= 0 (count note-stream))
-        (println "done")
-        (do
-          (println note-stream curr-time)
-          (at (+ (now) curr-time) (piano :note (note "C4")) 1000)
-          (recur (rest note-stream) (+ curr-time 1000))
+    (if (= 0 (count note-stream))
+      (println "done")
+      (do
+        (let [curr-note (first note-stream)]
+          (do
+            ; (println note-stream curr-time curr-note)
+            (if (= (get curr-note :pitch) 0)
+                (Thread/sleep (get curr-note :len)) ; if its a rest, do nothing
+                (at (+ (now) curr-time) (piano :note (note (get curr-note :pitch))) (get curr-note :len))
+            )
+            (recur (rest note-stream) (+ curr-time (get curr-note :len)))
+          )  
         )
       )
-
+    )
   )
 )
+
+
 ; (at (+ 5000 (now)) (piano :note (note "C4")) 1000)
 
 ; curr_time = 0
@@ -80,13 +91,29 @@
       octave-down (count (filter (fn [chr] (= \- chr)) octave))
       octave-modifier (* 12 (- octave-up octave-down))]
 
-    (println note base-pitch octave-modifier)
+    ; (println note base-pitch octave-modifier)
     (if (= 0 base-pitch)
       0 ; if it's a rest, don't apply any octave modifiers
       (+ base-pitch octave-modifier)
     )
   )
   ; TODO implement
+)
+
+(defn len-to-ms
+  "Given a note len and a tempo, returns how many ms the note should last."
+  [len]
+  (def len-converter {
+    1 1000
+    2 500
+    4 250
+    8 125
+    16 62
+    32 31
+    64 15
+    128 8
+  })
+  (len-converter len)
 )
 
 (defn parse-note
@@ -103,16 +130,30 @@
           :pitch (note-to-pitch (subvec note-info 1))
           :len 
             (if (= (note-info 2) nil) 
-              4                           ; default to quarter note
-              (read-string (note-info 2))
+              (len-to-ms 4) ; default to quarter note
+              (len-to-ms (read-string (note-info 2)))
             )
         )
       )
     )
   )
-
   ; (re-find #"\([ ]*([A-G-a-g][#_]?)[ ]*([ ]+[\d]+)?[ ]*([ ]+[+-]+)?[ ]*\)" noteString)
 )
+
+(defn mary-had-a-little-lamb
+  []
+  (def e (parse-note "(E)"))
+  (def f (parse-note "(F#)"))
+  (def f2 (parse-note "(F# 2)"))
+  (def g (parse-note "(G)"))
+  (def g2 (parse-note "(G 2)"))
+  (def b (parse-note "(B +)"))
+  (def b2 (parse-note "(B 2 +)"))
+  (def r (parse-note "(R 8)"))
+  (def e2 (parse-note "(E 2)"))
+  (schedule-note-stream (list g f e f g g g2 f f f2 g b b2 g f e f g g g g f f g f e2))
+)
+
 
 (defn parse-note-stream [file-contents]
   "Takes a String called fileContents and parses and tokenizes each note 
@@ -125,10 +166,10 @@
 (defn -main
   "I don't do a whole lot ... yet."
   [& args]
-  (println "Hello, World!")
   (def c (Note. 100 8))
   (def plunk (NoteEvent. 2 c))
   ; (println c)
   ; (println plunk)
   (println (parse-note "(A#  ++)"))
 )
+
