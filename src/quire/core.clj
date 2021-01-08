@@ -8,14 +8,11 @@
 ; - add more instruments
 
 (require '[clojure.string :as str])
-; (use 'overtone.live)
+; (do (use 'overtone.live) (use 'overtone.inst.piano))
 ; (use 'overtone.inst.piano)
 
 (defrecord Note [pitch len])
 (defrecord NoteEvent [timing note])
-
-; (G) (F#) (E) (F#) (G) (G) (G) (F#) (F#) (F#) (G) (B) (B) (R) 
-; (G) (F#) (E) (F#) (G) (G) (G) (G) (F#) (F#) (G) (F#) (E 2)
 
 (defn schedule-note-stream [note-stream]
   "Schedules the note-stream to be played using Overtone."
@@ -39,14 +36,6 @@
     )
   )
 )
-
-
-; (at (+ 5000 (now)) (piano :note (note "C4")) 1000)
-
-; curr_time = 0
-; for note in notestream:
-;   at curr-time note
-;   curr_time += note.type * tempo
 
 (defn looper-test [x]
   (loop [sum 0
@@ -85,6 +74,7 @@
     "a_"  68
     "r"   0
   })
+
   (let [[note _ octave] note-info
       base-pitch (note-pitches (str/lower-case note))
       octave-up (count (filter (fn [chr] (= \+ chr)) octave))
@@ -97,7 +87,6 @@
       (+ base-pitch octave-modifier)
     )
   )
-  ; TODO implement
 )
 
 (defn len-to-ms
@@ -154,22 +143,22 @@
   (schedule-note-stream (list g f e f g g g2 f f f2 g b b2 g f e f g g g g f f g f e2))
 )
 
-
 (defn parse-note-stream [file-contents]
   "Takes a String called fileContents and parses and tokenizes each note 
   individually until no more notes are available, throwing error if necessary.
   Returns seq of NoteEvent"
   
-  ; @TODO
+  (map parse-note (str/split file-contents #","))
 )
 
 (defn -main
-  "I don't do a whole lot ... yet."
-  [& args]
-  (def c (Note. 100 8))
-  (def plunk (NoteEvent. 2 c))
-  ; (println c)
-  ; (println plunk)
-  (println (parse-note "(A#  ++)"))
+  []
+  (loop []
+    (println "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+    (println "| 🎵 Enter .quire file to play 🎵 |")
+    (println "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+    (schedule-note-stream (parse-note-stream (slurp (read-line))))
+    (recur)
+  )
 )
 
