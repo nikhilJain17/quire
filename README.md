@@ -28,7 +28,7 @@ note := ε | '(' pitch length octave ')'
 
 A song is a comma separated list of notes.
 ```
-song := ε | note | note "," note-stream
+song := ε | note | note "," song
 ```
 
 ## Features
