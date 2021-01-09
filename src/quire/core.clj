@@ -37,17 +37,6 @@
   )
 )
 
-(defn looper-test [x]
-  (loop [sum 0
-        i 0]
-    (println i sum)
-    (if (= i x)
-      [sum]
-      (recur (+ sum i) (+ i 1))
-    )
-  )
-)
-
 (defn note-to-pitch
   "Takes a note with optional sharps or flats, along with the octave,
   and returns what pitch (i.e. MIDI number) the note is."
@@ -92,15 +81,16 @@
 (defn len-to-ms
   "Given a note len and a tempo, returns how many ms the note should last."
   [len]
+  ; @TODO input tempo from user instead of hardcoding 
   (def len-converter {
-    1 1000
-    2 500
-    4 250
-    8 125
-    16 62
-    32 31
-    64 15
-    128 8
+    1 2000
+    2 1000
+    4 500
+    8 250
+    16 125
+    32 62
+    64 31
+    128 15
   })
   (len-converter len)
 )
@@ -126,10 +116,10 @@
       )
     )
   )
-  ; (re-find #"\([ ]*([A-G-a-g][#_]?)[ ]*([ ]+[\d]+)?[ ]*([ ]+[+-]+)?[ ]*\)" noteString)
 )
 
 (defn mary-had-a-little-lamb
+  "Example of a song that would be created from REPL instead of in a .quire file"
   []
   (def e (parse-note "(E)"))
   (def f (parse-note "(F#)"))
