@@ -1,7 +1,7 @@
 # quire
 
 ## Description
-A simple music programming language written in Clojure.
+A simple music language / piano written in Clojure.
 
 ## Disclaimer
 I wrote this as my first Clojure project to learn the language, so please forgive my lack of music knowledge.
