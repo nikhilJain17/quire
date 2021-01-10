@@ -3,8 +3,16 @@
 ## Description
 A simple music language / piano written in Clojure.
 
-## Disclaimer
-I wrote this as my first Clojure project to learn the language, so please forgive my lack of music knowledge.
+## Demos
+### Harry Potter  
+[![Harry Potter](http://img.youtube.com/vi/jpjjvMsLSCQ/0.jpg)](https://www.youtube.com/watch?v=jpjjvMsLSCQ&feature=youtu.be)  
+
+
+### Happy Birthday  
+[![Happy Birthday](http://img.youtube.com/vi/D-TZUNGhTEk/0.jpg)](https://www.youtube.com/watch?v=D-TZUNGhTEk)  
+
+### Twinkle Twinkle
+[![Twinkle Twinkle](http://img.youtube.com/vi/TIpGSH48nAo/0.jpg)](https://www.youtube.com/watch?v=TIpGSH48nAo)  
 
 ## Language
 Pitch is the note you want to play, where "#" is a sharp and "\_" is a flat. "R" and "r" correspond to a rest.
