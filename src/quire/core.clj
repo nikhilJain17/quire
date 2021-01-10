@@ -24,7 +24,6 @@
       (do
         (let [curr-note (first note-stream)]
           (do
-            ; (println note-stream curr-time curr-note)
             (if (= (get curr-note :pitch) 0)
                 (Thread/sleep (get curr-note :len)) ; if its a rest, do nothing
                 (at (+ (now) curr-time) (piano :note (note (get curr-note :pitch))) (get curr-note :len))
@@ -70,7 +69,6 @@
       octave-down (count (filter (fn [chr] (= \- chr)) octave))
       octave-modifier (* 12 (- octave-up octave-down))]
 
-    ; (println note base-pitch octave-modifier)
     (if (= 0 base-pitch)
       0 ; if it's a rest, don't apply any octave modifiers
       (+ base-pitch octave-modifier)
@@ -80,25 +78,25 @@
 
 (defn len-to-ms
   "Given a note len and a tempo, returns how many ms the note should last."
-  [len]
+  [len tempo]
   ; @TODO input tempo from user instead of hardcoding 
   (def len-converter {
-    1 2000
-    2 1000
-    4 500
-    8 250
-    16 125
-    32 62
-    64 31
-    128 15
+    1 (int (* 4 tempo))
+    2 (int (* 2 tempo))
+    4 (int tempo)
+    8 (int (/ tempo 2))
+    16 (int (/ tempo 4))
+    32 (int (/ tempo 8))
+    64 (int (/ tempo 16))
+    128 (int (/ tempo 32))
   })
   (len-converter len)
 )
 
 (defn parse-note
-  "Takes a String object called noteString and validates it. 
+  "Takes a String object called note-string and validates it. 
   Either it returns Note :: {:pitch <int> :len <int>}, or an Error."
-  [note-string]
+  [tempo note-string]
   (let
     [note-info (re-find #"\([ ]*([A-GR-a-gr][#_]?)[ ]*([ ]+[\d]+)?[ ]*([ ]+[+-]+)?[ ]*\)" note-string)] ;@TODO is this regex robust?
     (if (= note-info nil) 
@@ -109,8 +107,8 @@
           :pitch (note-to-pitch (subvec note-info 1))
           :len 
             (if (= (note-info 2) nil) 
-              (len-to-ms 4) ; default to quarter note
-              (len-to-ms (read-string (note-info 2)))
+              (len-to-ms 4 tempo) ; default to quarter note
+              (len-to-ms (read-string (note-info 2)) tempo)
             )
         )
       )
@@ -133,12 +131,12 @@
   (schedule-note-stream (list g f e f g g g2 f f f2 g b b2 g f e f g g g g f f g f e2))
 )
 
-(defn parse-note-stream [file-contents]
+(defn parse-note-stream [file-contents tempo]
   "Takes a String called fileContents and parses and tokenizes each note 
   individually until no more notes are available, throwing error if necessary.
   Returns seq of NoteEvent"
   
-  (map parse-note (str/split file-contents #","))
+  (map (partial parse-note tempo) (str/split file-contents #","))
 )
 
 (defn -main
@@ -147,7 +145,7 @@
     (println "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
     (println "| 🎵 Enter .quire file to play 🎵 |")
     (println "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-    (schedule-note-stream (parse-note-stream (slurp (read-line))))
+    (schedule-note-stream (parse-note-stream (slurp (read-line)) 500))
     (recur)
   )
 )
